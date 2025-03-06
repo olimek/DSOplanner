@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="DSOplanner.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:DSOplanner"
+    Title="DSOplanner"
+    FlyoutBehavior="Locked"
+    NavBarIsVisible="False"
+FlyoutWidth="250"
+    FlyoutHeaderBehavior="Scroll"
+    NavBarHasShadow="False">
+
+    <Shell.FlyoutContent>
+        <Grid x:Name="SideNavGrid">
+            <Grid.ColumnDefinitions>
+                <!--  Początkowa szerokość panelu ustawiona na 250  -->
+                <ColumnDefinition x:Name="SideNavColumn" Width="250" />
+            </Grid.ColumnDefinitions>
+            <StackLayout Padding="2" Spacing="10">
+                <!--  Przycisk do zwijania/rozwijania panelu  -->
+                <Button
+                    x:Name="ToggleButton"
+                    BackgroundColor="Transparent"
+                    Clicked="ToggleButton_Clicked"
+                    Text="Zwiń" />
+                <!--  Elementy nawigacyjne  -->
+                <Button Command="{Binding NavigateHomeCommand}" Text="Home" />
+                <Button Command="{Binding NavigateSettingsCommand}" Text="Settings" />
+                <Button Command="{Binding NavigateProfileCommand}" Text="Profile" />
+                <Button Command="{Binding NavigateHelpCommand}" Text="Help" />
+            </StackLayout>
+        </Grid>
+    </Shell.FlyoutContent>
+
+    <!--  Główna zawartość Shell  -->
+    <ShellContent
+        Title="Home"
+        ContentTemplate="{DataTemplate local:MainPage}"
+        Route="MainPage" />
+</Shell>
