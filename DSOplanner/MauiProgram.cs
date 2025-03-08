@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using DSOplanner.ViewModels;
+using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
 #if WINDOWS
 using Microsoft.UI;
@@ -46,6 +47,10 @@ namespace DSOplanner
                     });
 #endif
                 });
+
+            builder.Services.AddSingleton<DsoViewModel>();
+            builder.Services.AddSingleton<TelescopeViewModel>();
+            builder.Services.AddSingleton<CameraViewModel>();
 
 #if DEBUG
             builder.Logging.AddDebug();

@@ -1,46 +1,89 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
+using System.Threading.Tasks;
+using DSOplanner.ViewModels;
 using Microsoft.Maui.Controls;
 
 namespace DSOplanner
 {
-    public partial class MainPage : ContentPage
+    public partial class MainPage : ContentPage, INotifyPropertyChanged
     {
-        // Kolekcja obiektów DSO
-        public ObservableCollection<DsoViewModel> DsoObjects { get; set; }
+        public ObservableCollection<DsoViewModel> DsoObjects { get; set; } = new ObservableCollection<DsoViewModel>();
+        private bool _isLoading = false;
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public MainPage()
         {
             InitializeComponent();
-
-            // Inicjalizacja przykładowych danych
-            DsoObjects = new ObservableCollection<DsoViewModel>
-            {
-                new DsoViewModel { Name = "M31 – Galaktyka Andromedy", Description = "Największa galaktyka lokalna", Type = "Galaktyka", Excluded = false },
-                new DsoViewModel { Name = "M42 – Mgławica Oriona", Description = "Jasna mgławica, widoczna gołym okiem", Type = "Mgławica", Excluded = false },
-                new DsoViewModel { Name = "M13 – Wielki Globular", Description = "Jeden z najjaśniejszych gromad kulistych", Type = "Gromada", Excluded = true }
-            };
-
-            ItemsListView.ItemsSource = DsoObjects;
-
-            SessionDatePicker.DateSelected += SessionDatePicker_DateSelected;
+            BindingContext = this;
         }
 
-      
-
-        private void SessionDatePicker_DateSelected(object sender, DateChangedEventArgs e)
+        protected override async void OnAppearing()
         {
-            // Tutaj możesz dodać logikę filtrowania obiektów na podstawie wybranej daty sesji.
-            // Przykład: FilterDsoObjects(e.NewDate);
+            base.OnAppearing();
+            await LoadDsoData();
         }
-    }
 
-    // ViewModel reprezentujący obiekt DSO do wyświetlania w liście
-    public class DsoViewModel
-    {
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string Type { get; set; }
-        public bool Excluded { get; set; }
+        private async Task LoadDsoData()
+        {
+            if (_isLoading) return;
+            _isLoading = true;
+
+            await DsoCsvLoader.InitializeReader("merged_telescopius.csv");
+
+            var batch = await DsoCsvLoader.GetNextBatch();
+            if (batch.Count > 0)
+            {
+                // Batch update UI
+                await Dispatcher.DispatchAsync(() =>
+                {
+                    foreach (var dso in batch)
+                        DsoObjects.Add(dso);
+                });
+            }
+
+            _isLoading = false;
+        }
+
+        private async void OnItemAppearing(object sender, ItemsViewScrolledEventArgs e)
+        {
+            if (_isLoading || DsoObjects.Count == 0) return;
+
+            if (DsoObjects.Count - e.LastVisibleItemIndex < 10) // Load more when nearing the end
+            {
+                await LoadMoreDso();
+            }
+        }
+
+        private async void OnRemainingItemsThresholdReached(object sender, EventArgs e)
+        {
+            await LoadMoreDso();
+        }
+
+        public async Task LoadMoreDso()
+        {
+            if (_isLoading) return;
+            _isLoading = true;
+
+            var nextBatch = await DsoCsvLoader.GetNextBatch();
+            if (nextBatch.Count > 0)
+            {
+                await Dispatcher.DispatchAsync(() =>
+                {
+                    foreach (var dso in nextBatch)
+                        DsoObjects.Add(dso);
+                });
+            }
+
+            _isLoading = false;
+        }
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

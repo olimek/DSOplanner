@@ -11,65 +11,57 @@
             Grid.ColumnSpan="2"
             Padding="10"
             BackgroundColor="DarkGray">
-          
+
             <!--  Logo  -->
             <Image
                 HeightRequest="40"
                 Source="logo.png"
                 VerticalOptions="Center" />
+
             <!--  Tytuł  -->
             <Label
-                
                 Margin="10,0,0,0"
                 FontSize="20"
                 Text="AstroWeather"
                 VerticalOptions="Center" />
+
             <!--  Przycisk ustawień  -->
-            <Button
-                
-                Text="Ustawienia"
-                VerticalOptions="Center" />
+            <Button Text="Ustawienia" VerticalOptions="Center" />
         </Grid>
 
         <!--  Główna treść  -->
-        <StackLayout
-            Grid.Row="1"
-            
-            Padding="10"
-            Spacing="15">
-            <!--  Pasek filtru (np. wybór daty sesji)  -->
-            <StackLayout Orientation="Horizontal" Spacing="10">
-                <Label Text="Data sesji:" VerticalOptions="Center" />
-                <DatePicker x:Name="SessionDatePicker" />
-            </StackLayout>
+        <ScrollView Grid.Row="1">
+            <StackLayout Padding="10" Spacing="15">
 
-            <!--  Lista obiektów DSO  -->
-            <ListView x:Name="ItemsListView" HasUnevenRows="True">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <ViewCell>
-                            
-                                <!--  Informacje o obiekcie  -->
-                                <StackLayout>
-                                    <Label
-                                        FontAttributes="Bold"
-                                        FontSize="16"
-                                        Text="{Binding Name}" />
-                                    <Label
-                                        FontSize="12"
-                                        Text="{Binding Description}"
-                                        TextColor="Gray" />
-                                    <!--  Dodatkowe informacje, np. typ, widoczność itp.  -->
-                                    <Label
-                                        FontSize="12"
-                                        Text="{Binding Type}"
-                                        TextColor="DarkGray" />
-                                </StackLayout>
-                              
-                        </ViewCell>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </StackLayout>
+                <!--  Pasek filtru (np. wybór daty sesji)  -->
+                <StackLayout Orientation="Horizontal" Spacing="10">
+                    <Label Text="Data sesji:" VerticalOptions="Center" />
+                    <DatePicker x:Name="SessionDatePicker" />
+                </StackLayout>
+
+                <!--  Lista obiektów DSO  -->
+                <Label FontSize="18" Text="Obiekty DSO:" />
+                <CollectionView
+                    x:Name="ItemsCollectionView"
+                    ItemsSource="{Binding DsoObjects}"
+                    RemainingItemsThreshold="10"
+                    RemainingItemsThresholdReached="OnRemainingItemsThresholdReached">
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <StackLayout Padding="10">
+                                <Label
+                                    FontAttributes="Bold"
+                                    FontSize="20"
+                                    Text="{Binding Name}" />
+                                <Label FontSize="16" Text="{Binding Type}" />
+                                <Label FontSize="14" Text="{Binding Magnitude, StringFormat='Mag: {0:F1}'}" />
+                                <Label FontSize="14" Text="{Binding RightAscension, StringFormat='RA: {0:F2}h'}, {Binding Declination, StringFormat='Dec: {0:F1}°'}" />
+                            </StackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </StackLayout>
+        </ScrollView>
     </Grid>
 </ContentPage>
